@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cek Drillbit — Deteksi Plagiarisme</title>
+  <style>
+:root{--bg:#eef4fb;--surface:#fff;--ink:#1e293b;--muted:#64748b;--line:#e2e8f0;--blue:#1d4ed8;--blue-deep:#1e3a8a;--blue-soft:#eff6ff;--blue-mid:#2563eb;--ok:#16a34a;--ok-bg:#ecfdf5;--danger:#dc2626;--qris-red:#e31c23;--shadow:0 10px 30px rgba(15,23,42,.06);--radius:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+.page{max-width:1180px;margin:0 auto;padding:28px 20px 48px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.03em;color:var(--blue-deep)}
+.brand-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(180deg,#2563eb,#1e3a8a);display:grid;place-items:center;color:#fff;box-shadow:0 6px 14px rgba(37,99,235,.28)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+.card,.price-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card{padding:28px 28px 24px}
+.stepper{display:grid;grid-template-columns:1fr 1fr 1fr;position:relative;margin-bottom:28px;padding:0 12px}
+.stepper::before{content:"";position:absolute;top:16px;left:16%;right:16%;height:2px;background:#e5e7eb;z-index:0}
+.step{position:relative;z-index:1;text-align:center;cursor:pointer;background:transparent;border:0;color:inherit;font:inherit}
+.step-num{width:32px;height:32px;margin:0 auto 8px;border-radius:999px;display:grid;place-items:center;font-weight:700;font-size:14px;background:#fff;color:#94a3b8;border:2px solid #e5e7eb}
+.step.active .step-num,.step.done .step-num{background:var(--blue);border-color:var(--blue);color:#fff}
+.step-label{font-size:13px;color:#94a3b8;font-weight:500}
+.step.active .step-label{color:var(--ink);font-weight:700}
+.service-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.service-title{display:flex;gap:12px;align-items:flex-start}
+.icon-box{width:42px;height:42px;border-radius:10px;background:var(--blue);color:#fff;display:grid;place-items:center;flex-shrink:0}
+.service-title h1{font-size:20px;line-height:1.2;letter-spacing:-.02em}
+.service-title p{color:var(--muted);font-size:14px;margin-top:2px}
+.help-btn{border:0;background:transparent;color:#94a3b8;font-size:13px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:6px 0}
+.help-btn:hover{color:var(--blue)}
+.rules{background:var(--warn-bg,#fff7ed);border:1px solid var(--warn-border,#fed7aa);color:var(--warn-text,#9a3412);border-radius:12px;padding:14px 16px 14px 32px;margin-bottom:22px;font-size:13px}
+.rules li+li{margin-top:6px}
+.section-title{font-size:15px;margin:6px 0 10px}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.upload-box{border:1px dashed #cbd5e1;border-radius:14px;padding:16px;background:#f8fbff}
+.upload-label{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px}
+.dropzone{border:1px dashed #93c5fd;border-radius:12px;padding:28px 16px;text-align:center;color:var(--muted);cursor:pointer;background:#fff}
+.dropzone.drag{background:var(--blue-soft);border-color:var(--blue)}
+.dropzone p{margin-top:8px;font-size:14px}
+.file-row{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.file-icon{width:38px;height:38px;border-radius:8px;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center}
+.file-meta{min-width:0}
+.file-name{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.status-ok{color:var(--ok);font-size:13px;display:inline-flex;align-items:center;gap:6px;font-weight:600;margin-left:auto}
+.icon-btn{border:0;background:transparent;color:#94a3b8;cursor:pointer;width:32px;height:32px;border-radius:8px;display:grid;place-items:center}
+.icon-btn:hover{background:#fee2e2;color:var(--danger)}
+.ready-chip{display:flex;justify-content:flex-end;color:var(--ok);font-size:13px;font-weight:600;margin-bottom:4px;align-items:center;gap:6px}
+.price-card{overflow:hidden}
+.price-head{background:var(--blue);color:#fff;padding:16px 18px;font-weight:700;font-size:16px}
+.price-head small{display:block;font-weight:500;opacity:.85;font-size:12px;margin-top:2px}
+.price-body{padding:16px 18px 18px}
+.price-row{display:flex;justify-content:space-between;font-size:14px;padding:8px 0;color:#334155}
+.price-row span:last-child{font-weight:600;color:var(--ink)}
+.price-total{border-top:1px solid var(--line);margin-top:8px;padding-top:14px;display:flex;justify-content:space-between;align-items:center;font-weight:800}
+.price-total b{font-size:20px;color:var(--ink)}
+.ref-label{display:block;font-size:13px;color:var(--muted);margin:18px 0 8px}
+.ref-row{display:flex;gap:8px}
+.ref-row input{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit;font-size:13px;outline:none}
+.ref-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.btn{border:0;border-radius:8px;cursor:pointer;font:inherit;font-weight:700;transition:160ms ease}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--blue);padding:10px 14px;font-size:13px}
+.btn-ghost:hover{background:var(--blue-soft)}
+.btn-primary{width:100%;margin-top:14px;background:var(--blue);color:#fff;padding:12px 14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:14px}
+.btn-primary:hover{background:var(--blue-mid)}
+.btn-primary:disabled{background:#94a3b8;cursor:not-allowed}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+label{font-size:13px;font-weight:600;color:#334155}
+input[type="text"],input[type="email"],input[type="tel"],input[type="number"],select,textarea{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit;font-size:14px;outline:none;background:#fff}
+textarea{min-height:90px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.pay-grid{display:grid;gap:10px}
+.pay-opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;background:#fff}
+.pay-opt input{accent-color:var(--blue)}
+.pay-opt.selected{border-color:var(--blue);background:var(--blue-soft)}
+.pay-opt b{display:block;font-size:14px}
+.pay-opt small{color:var(--muted)}
+.receipt{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:16px}
+.ok-banner{background:var(--ok-bg);color:#166534;border-radius:12px;padding:16px;margin-bottom:16px}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;place-items:center;padding:16px;z-index:30}
+.modal.open{display:grid}
+.modal-card{background:#fff;width:min(520px,100%);border-radius:16px;padding:18px;box-shadow:0 20px 50px rgba(15,23,42,.2);max-height:92vh;overflow:auto}
+.modal-card.pay-wide{width:min(440px,100%);padding:0;overflow:hidden}
+.modal-card ol{padding-left:18px;color:#334155}
+.modal-card li+li{margin-top:8px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0}
+.modal-head h2{font-size:16px}
+.modal-x{border:0;background:#f1f5f9;width:32px;height:32px;border-radius:999px;font-size:20px;cursor:pointer;line-height:1;color:#64748b}
+.pay-amount-bar{margin:12px 16px 0;background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;border-radius:10px;padding:10px 12px;font-size:13px;display:flex;justify-content:space-between}
+.acc-list,.ew-box{padding:14px 16px 16px;display:grid;gap:10px}
+.acc-card,.ew-card{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.acc-card .bank,.ew-card .bank{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--blue);text-transform:uppercase}
+.acc-card .num,.ew-num{font-size:18px;font-weight:800;letter-spacing:.03em;margin:4px 0 2px}
+.acc-card .an,.ew-an{font-size:12px;color:var(--muted)}
+.copy-btn{border:0;background:var(--blue-soft);color:var(--blue);font-weight:700;font-size:12px;padding:8px 10px;border-radius:8px;cursor:pointer;flex-shrink:0}
+.copy-btn:hover{background:#dbeafe}
+.qris-wrap{padding:12px 16px 16px}
+.qris-img{width:100%;border-radius:8px;display:block;background:#fff}
+.qris-poster{position:relative;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px 14px 72px;overflow:hidden}
+.qris-poster::before{content:"";position:absolute;left:0;top:78px;border-top:40px solid transparent;border-bottom:40px solid transparent;border-left:32px solid var(--qris-red)}
+.qris-top{display:flex;justify-content:space-between;align-items:flex-start}
+.qris-mark{font-weight:900;font-size:28px;letter-spacing:-.04em;line-height:1}
+.qris-sub{font-size:11px;color:#334155;line-height:1.25;margin-top:2px}
+.gpn{color:var(--qris-red);font-weight:900;font-size:18px;display:flex;align-items:center;gap:4px}
+.qris-mid{text-align:center;position:relative;z-index:1;margin-top:8px}
+.qris-mid h3{font-size:18px;letter-spacing:.02em}
+.nmid{margin-top:6px;font-size:14px;color:#334155}
+.tid{margin:6px 0 10px;font-size:18px;color:#64748b;font-weight:600}
+.qris-frame{width:min(280px,78%);margin:0 auto;aspect-ratio:1;border:3px solid #111;padding:8px;background:#fff}
+.qris-frame canvas{width:100%;height:100%;display:block}
+.qris-slogan{margin-top:12px;font-weight:800;font-size:16px}
+.qris-aspi{margin-top:6px;font-size:13px;color:#475569}
+.qris-foot{position:absolute;left:14px;bottom:14px;font-size:12px;color:#334155;z-index:1}
+.qris-how{position:absolute;right:0;bottom:0;background:var(--qris-red);color:#fff;padding:10px 12px 12px 18px;border-top-left-radius:18px;font-size:10px;text-align:right}
+.qris-how-row{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.qris-how-row i{width:28px;height:28px;border:1.5px solid #fff;border-radius:999px;display:grid;place-items:center;font-style:normal;font-weight:700}
+.toast{position:fixed;right:18px;bottom:18px;background:#0f172a;color:#fff;padding:12px 14px;border-radius:10px;font-size:13px;opacity:0;transform:translateY(8px);pointer-events:none;transition:200ms ease;z-index:40}
+.toast.show{opacity:1;transform:none}
+.hidden{display:none!important}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.price-card{order:-1}.form-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.2-3.2"/>
+          </svg>
+        </div>
+        CEK DRILLBIT CEREBRIX
+      </div>
+    </div>
+
+    <div class="layout">
+      <section class="card">
+        <div class="stepper" role="list">
+          <button class="step active" data-goto="1" type="button">
+            <div class="step-num">1</div>
+            <div class="step-label">Upload</div>
+          </button>
+          <button class="step" data-goto="2" type="button">
+            <div class="step-num">2</div>
+            <div class="step-label">Detail</div>
+          </button>
+          <button class="step" data-goto="3" type="button">
+            <div class="step-num">3</div>
+            <div class="step-label">Pembayaran</div>
+          </button>
+        </div>
+
+        <div id="step-1">
+          <div class="service-head">
+            <div class="service-title">
+              <div class="icon-box" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.2-3.2"/>
+                </svg>
+              </div>
+              <div>
+                <h1>Cek Drillbit</h1>
+                <p>Deteksi plagiarisme dengan Drillbit</p>
+              </div>
+            </div>
+            <button class="help-btn" id="helpBtn" type="button">
+              <span style="display:inline-grid;place-items:center;width:16px;height:16px;border:1.5px solid currentColor;border-radius:99px;font-size:11px;">?</span>
+              Cara Order
+            </button>
+          </div>
+
+          <ul class="rules">
+            <li>Unggah dokumen PDF atau DOCX (maks. 25 MB). File disimpan di perangkat Anda.</li>
+            <li>Tarif Rp 10 per kata, minimum Rp 6.000. Jumlah kata diisi dari hitungan Word.</li>
+            <li>Setelah pembayaran, pesanan otomatis dikirim ke WhatsApp admin beserta tautan file.</li>
+          </ul>
+
+          <div class="field" style="margin-bottom:20px;">
+            <label for="wordInput">Total kata di Word</label>
+            <input id="wordInput" type="number" min="0" step="1" inputmode="numeric" placeholder="Contoh: 4532" />
+            <p class="hint">Hitung dari semua kata di Word, termasuk daftar pustaka dan cover.</p>
+          </div>
+
+          <h2 class="section-title">Upload File</h2>
+          <div class="upload-box">
+            <div class="ready-chip hidden" id="readyChip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg>
+              File tersimpan
+            </div>
+            <div class="upload-label">Dokumen</div>
+            <div class="dropzone" id="dropzone">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                <path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M20 16v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3"/>
+              </svg>
+              <p>Seret file ke sini atau <strong>pilih file</strong></p>
+              <p style="font-size:12px;">PDF / DOCX · maks 25 MB</p>
+            </div>
+            <input id="fileInput" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden />
+            <div class="file-row hidden" id="fileRow">
+              <div class="file-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <path d="M14 2v6h6"/>
+                </svg>
+              </div>
+              <div class="file-meta">
+                <div class="file-name" id="fileName">dokumen.docx</div>
+                <div class="file-sub" id="fileSub">0 KB</div>
+              </div>
+              <div class="status-ok">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>
+              </div>
+              <button class="icon-btn" id="removeFile" type="button" aria-label="Hapus file">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="step-2" class="hidden">
+          <div class="service-head">
+            <div class="service-title">
+              <div class="icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+              </div>
+              <div>
+                <h1>Detail Pesanan</h1>
+                <p>Lengkapi data pemesan sebelum pembayaran</p>
+              </div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="fullName">Nama lengkap</label>
+              <input id="fullName" type="text" placeholder="Nama sesuai identitas" />
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" type="email" placeholder="nama@email.com" />
+            </div>
+            <div class="field">
+              <label for="phone">Nomor WhatsApp</label>
+              <input id="phone" type="tel" placeholder="08xxxxxxxxxx" />
+            </div>
+            <div class="field">
+              <label for="campus">Institusi / kampus</label>
+              <input id="campus" type="text" placeholder="Opsional" />
+            </div>
+            <div class="field">
+              <label for="docType">Jenis dokumen</label>
+              <select id="docType">
+                <option>Skripsi / Tugas akhir</option>
+                <option>Tugas kuliah</option>
+                <option>Artikel / jurnal</option>
+                <option>Lainnya</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="priority">Prioritas</label>
+              <select id="priority">
+                <option value="normal">Normal — hasil 1x24 jam</option>
+                <option value="express">Express — hasil lebih cepat</option>
+              </select>
+            </div>
+            <div class="field full">
+              <label for="note">Catatan</label>
+              <textarea id="note" placeholder="Contoh: cek similarity saja, kirim hasil ke email"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div id="step-3" class="hidden">
+          <div class="service-head">
+            <div class="service-title">
+              <div class="icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+              </div>
+              <div>
+                <h1>Pembayaran</h1>
+                <p>Pilih metode, lalu konfirmasi. Pesanan dikirim ke WhatsApp admin.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="payForm">
+            <div class="pay-grid" id="payOptions">
+              <label class="pay-opt selected">
+                <input type="radio" name="pay" value="qris" checked />
+                <div><b>QRIS</b><small>Scan dan bayar instan</small></div>
+              </label>
+              <label class="pay-opt">
+                <input type="radio" name="pay" value="bank" />
+                <div><b>Bank</b><small>BRI, SeaBank, BCA Digital, BCA</small></div>
+              </label>
+              <label class="pay-opt">
+                <input type="radio" name="pay" value="ewallet" />
+                <div><b>E-Wallet</b><small>DANA, GoPay, ShopeePay</small></div>
+              </label>
+            </div>
+          </div>
+
+          <div id="successBox" class="hidden">
+            <div class="ok-banner">
+              <b>Pesanan dikirim ke WhatsApp admin.</b> File dokumen juga diunduh ke perangkat Anda sebagai salinan tersimpan.
+            </div>
+            <div class="receipt" id="receipt"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="price-card">
+        <div class="price-head">
+          Informasi Harga
+          <small>Drillbit</small>
+        </div>
+        <div class="price-body">
+          <div class="price-row"><span>Harga per kata</span><span>Rp 10</span></div>
+          <div class="price-row"><span>Total kata</span><span id="wordView">0</span></div>
+          <div class="price-row"><span>Harga minimum</span><span>Rp 6.000</span></div>
+          <div class="price-row hidden" id="discRow"><span>Diskon referral</span><span id="discView">- Rp 0</span></div>
+          <div class="price-total"><span>Total Harga</span><b id="totalView">Rp 0</b></div>
+
+          <label class="ref-label" for="refCode">Kode Referral (Opsional)</label>
+          <div class="ref-row">
+            <input id="refCode" type="text" placeholder="Masukkan kode referral" />
+            <button class="btn btn-ghost" id="applyRef" type="button">Terapkan</button>
+          </div>
+
+          <button class="btn btn-primary" id="ctaBtn" type="button" disabled>
+            Lanjutkan
+          </button>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="modal-card" style="padding:22px;">
+      <h2 id="helpTitle" style="margin-bottom:12px;">Cara Order</h2>
+      <ol>
+        <li>Isi total kata sesuai hitungan Microsoft Word. Tarif dihitung otomatis (Rp 10/kata, min. Rp 6.000).</li>
+        <li>Unggah 1 file PDF atau DOCX, maksimal 25 MB. File disimpan di perangkat Anda.</li>
+        <li>Isi data pemesan di langkah Detail.</li>
+        <li>Pilih metode pembayaran, lalu konfirmasi. Pesanan otomatis dikirim ke WhatsApp admin.</li>
+        <li>Kode referral valid: <b>SCAN10</b> (diskon 10%).</li>
+      </ol>
+      <button class="btn btn-primary" id="closeHelp" type="button" style="margin-top:16px;">Mengerti</button>
+    </div>
+  </div>
+
+  <div class="modal" id="qrisModal" role="dialog" aria-modal="true">
+    <div class="modal-card pay-wide">
+      <div class="modal-head">
+        <h2>Bayar dengan QRIS</h2>
+        <button class="modal-x" type="button" data-close="qrisModal" aria-label="Tutup">&times;</button>
+      </div>
+      <div class="pay-amount-bar">Nominal transfer <b class="pay-amount-val">Rp 0</b></div>
+      <div class="qris-wrap">
+        <img class="qris-img" id="qrisPhoto" src="QRIS.jpeg" alt="Poster QRIS CEREBRIX - COURSE" />
+        <div class="qris-poster" id="qrisPoster">
+          <div class="qris-top">
+            <div>
+              <div class="qris-mark">QRIS</div>
+              <div class="qris-sub">QR Code Standar<br>Pembayaran Nasional</div>
+            </div>
+            <div class="gpn">
+              <svg width="28" height="22" viewBox="0 0 28 22" fill="none"><path d="M14 2c3 3 6 4 8 4-2 5-5 9-8 14-3-5-6-9-8-14 2 0 5-1 8-4z" fill="#e31c23"/></svg>
+              GPN
+            </div>
+          </div>
+          <div class="qris-mid">
+            <h3>CEREBRIX - COURSE</h3>
+            <div class="nmid">NMID : ID1026500757731</div>
+            <div class="tid">A01</div>
+            <div class="qris-frame">
+              <canvas id="qrisCanvas" width="290" height="290" aria-label="Kode QRIS CEREBRIX - COURSE"></canvas>
+            </div>
+            <div class="qris-slogan">SATU QRIS UNTUK SEMUA</div>
+            <div class="qris-aspi">Cek aplikasi penyelenggara<br>di: www.aspi-qris.id</div>
+          </div>
+          <div class="qris-foot">Dicetak oleh : 93600918<br>Versi Cetak : 1.0-2026.04.02</div>
+          <div class="qris-how">
+            <span>Cara bayar dengan QRIS:</span>
+            <div class="qris-how-row"><i>1</i><i>2</i><i>3</i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="bankModal" role="dialog" aria-modal="true">
+    <div class="modal-card pay-wide">
+      <div class="modal-head">
+        <h2>Transfer Bank</h2>
+        <button class="modal-x" type="button" data-close="bankModal" aria-label="Tutup">&times;</button>
+      </div>
+      <div class="pay-amount-bar">Nominal transfer <b class="pay-amount-val">Rp 0</b></div>
+      <div class="acc-list">
+        <div class="acc-card">
+          <div>
+            <div class="bank">BRI</div>
+            <div class="num">0598 0100 6902 530</div>
+            <div class="an">a/n MUHAMMAD RIZKY HARDIANA</div>
+          </div>
+          <button type="button" class="copy-btn" data-copy="059801006902530">Salin</button>
+        </div>
+        <div class="acc-card">
+          <div>
+            <div class="bank">SeaBank</div>
+            <div class="num">901049031577</div>
+            <div class="an">a/n MUHAMMAD RIZKY HARDIANA</div>
+          </div>
+          <button type="button" class="copy-btn" data-copy="901049031577">Salin</button>
+        </div>
+        <div class="acc-card">
+          <div>
+            <div class="bank">BCA Digital</div>
+            <div class="num">005489773301</div>
+            <div class="an">a/n MUHAMMAD RIZKY HARDIANA</div>
+          </div>
+          <button type="button" class="copy-btn" data-copy="005489773301">Salin</button>
+        </div>
+        <div class="acc-card">
+          <div>
+            <div class="bank">BCA</div>
+            <div class="num">7405424436</div>
+            <div class="an">a/n MUHAMMAD RIZKY HARDIANA</div>
+          </div>
+          <button type="button" class="copy-btn" data-copy="7405424436">Salin</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="ewalletModal" role="dialog" aria-modal="true">
+    <div class="modal-card pay-wide">
+      <div class="modal-head">
+        <h2>E-Wallet</h2>
+        <button class="modal-x" type="button" data-close="ewalletModal" aria-label="Tutup">&times;</button>
+      </div>
+      <div class="pay-amount-bar">Nominal transfer <b class="pay-amount-val">Rp 0</b></div>
+      <div class="ew-box">
+        <div class="ew-card">
+          <div>
+            <div class="bank">DANA / GoPay / ShopeePay</div>
+            <div class="ew-num">08977921800</div>
+            <div class="ew-an">a/n MUHAMMAD RIZKY HARDIANA</div>
+          </div>
+          <button type="button" class="copy-btn" data-copy="08977921800">Salin</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+const PRICE_PER_WORD = 10;
+    const MIN_PRICE = 6000;
+    const MAX_BYTES = 25 * 1024 * 1024;
+    const ADMIN_WHATSAPP = "628976410666";
+    const DB_NAME = "cek-drillbit-files";
+    const STORE = "uploads";
+
+    const state = { step: 1, file: null, words: 0, bytes: 0, discount: 0, paid: false, savedId: null };
+    const $ = (id) => document.getElementById(id);
+    const dropzone = $("dropzone");
+    const fileInput = $("fileInput");
+    const fileRow = $("fileRow");
+    const readyChip = $("readyChip");
+    const ctaBtn = $("ctaBtn");
+    const wordInput = $("wordInput");
+
+    function formatRp(n) { return "Rp " + Math.round(n).toLocaleString("id-ID"); }
+    function formatBytes(n) {
+      if (n < 1024) return n + " B";
+      if (n < 1024 * 1024) return (n / 1024).toFixed(0) + " KB";
+      return (n / (1024 * 1024)).toFixed(2) + " MB";
+    }
+    function rawPrice() { return Math.max(state.words * PRICE_PER_WORD, state.words ? MIN_PRICE : 0); }
+    function totalPrice() { return Math.max(0, rawPrice() - state.discount); }
+    function toast(msg) {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 2800);
+    }
+    function cartIcon() {
+      return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M3 4h2l2.2 11h11.3l1.8-7H7"/></svg>`;
+    }
+    function waIcon() {
+      return `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5A11 11 0 0 0 2.1 17.7L1 23l5.4-1.1A11 11 0 0 0 20.5 3.5zm-8.5 17a9.1 9.1 0 0 1-4.6-1.3l-.3-.2-3.2.7.7-3.1-.2-.3A9.1 9.1 0 1 1 12 20.5zm5-6.8c-.3-.1-1.6-.8-1.9-.9s-.4-.1-.6.1-.7.9-.8 1-.3.2-.6.1a7.4 7.4 0 0 1-2.2-1.4 8.2 8.2 0 0 1-1.5-1.9c-.2-.3 0-.4.1-.6l.4-.5.3-.4c.1-.2 0-.3 0-.5l-.6-1.5c-.2-.4-.3-.3-.6-.3h-.5c-.2 0-.5.1-.8.4s-1 1-1 2.4 1.1 2.8 1.2 3 .9 1.9 3.3 3.1a14 14 0 0 0 1.4.5 3.3 3.3 0 0 0 1.5.1c.5-.1 1.6-.6 1.8-1.3s.2-1.1.2-1.2-.2-.2-.5-.3z"/></svg>`;
+    }
+    function canContinue() { return state.words > 0 && !!state.file; }
+
+    function renderPrice() {
+      $("wordView").textContent = state.words.toLocaleString("id-ID");
+      $("totalView").textContent = formatRp(totalPrice());
+      $("discRow").classList.toggle("hidden", state.discount <= 0);
+      $("discView").textContent = "- " + formatRp(state.discount);
+      document.querySelectorAll(".pay-amount-val").forEach((el) => { el.textContent = formatRp(totalPrice()); });
+      const ready = canContinue();
+      ctaBtn.disabled = !(ready && state.step < 3) && !(state.step === 3 && !state.paid && ready);
+      if (state.step === 1) ctaBtn.innerHTML = cartIcon() + " Lanjutkan";
+      if (state.step === 2) ctaBtn.innerHTML = cartIcon() + " Lanjut ke Pembayaran";
+      if (state.step === 3 && !state.paid) ctaBtn.innerHTML = waIcon() + " Kirim ke WhatsApp Admin";
+      if (state.paid) { ctaBtn.disabled = true; ctaBtn.textContent = "Pesanan terkirim"; }
+    }
+
+    function setStep(n) {
+      if (n > 1 && !state.words) { toast("Isi jumlah kata dulu."); return; }
+      if (n > 1 && !state.file) { toast("Upload file dokumen dulu."); return; }
+      if (n > 2) {
+        const name = $("fullName").value.trim();
+        const email = $("email").value.trim();
+        const phone = $("phone").value.trim();
+        if (!name || !email || !phone) { toast("Lengkapi nama, email, dan WhatsApp."); n = 2; }
+      }
+      state.step = n;
+      [1, 2, 3].forEach((i) => { $("step-" + i).classList.toggle("hidden", i !== n); });
+      document.querySelectorAll(".step").forEach((el) => {
+        const s = Number(el.dataset.goto);
+        el.classList.toggle("active", s === n);
+        el.classList.toggle("done", s < n);
+      });
+      renderPrice();
+    }
+
+    function applyManualWords(showToast) {
+      const raw = String(wordInput.value || "").replace(/[^\d]/g, "");
+      wordInput.value = raw;
+      const n = parseInt(raw, 10);
+      if (!raw || !n || n < 1) {
+        state.words = 0; state.discount = 0; renderPrice();
+        if (showToast) toast("Masukkan jumlah kata yang valid.");
+        return;
+      }
+      state.words = n;
+      if (state.discount > 0) state.discount = Math.round(rawPrice() * 0.1);
+      renderPrice();
+      if (showToast) toast("Tarif dihitung: " + n.toLocaleString("id-ID") + " kata.");
+    }
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: "id" });
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function persistFile(file) {
+      const db = await openDB();
+      const rec = { id: "latest-" + Date.now(), name: file.name, type: file.type, size: file.size, savedAt: Date.now(), blob: file };
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, "readwrite");
+        tx.objectStore(STORE).put(rec);
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+      state.savedId = rec.id;
+      try {
+        localStorage.setItem("cek-drillbit-last-file", JSON.stringify({ id: rec.id, name: rec.name, size: rec.size, savedAt: rec.savedAt }));
+      } catch (e) {}
+      return rec.id;
+    }
+
+    function downloadCopy(file) {
+      const url = URL.createObjectURL(file);
+      const a = document.createElement("a");
+      a.href = url; a.download = file.name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }
+
+    async function acceptFile(file) {
+      if (!file) return;
+      if (!/\.(pdf|docx)$/i.test(file.name)) { toast("Format harus PDF atau DOCX."); return; }
+      if (file.size > MAX_BYTES) { toast("File lebih dari 25 MB."); return; }
+      state.file = file; state.bytes = file.size; state.paid = false;
+      dropzone.classList.add("hidden");
+      fileRow.classList.remove("hidden");
+      readyChip.classList.remove("hidden");
+      $("fileName").textContent = file.name;
+      $("fileSub").textContent = formatBytes(file.size) + " · menyimpan...";
+      renderPrice();
+      try {
+        await persistFile(file);
+        $("fileSub").textContent = formatBytes(file.size) + " · file tersimpan di perangkat";
+        toast("File " + file.name + " berhasil disimpan.");
+      } catch (err) {
+        $("fileSub").textContent = formatBytes(file.size) + " · dokumen terunggah";
+        toast("File terunggah, tapi gagal disimpan permanen.");
+      }
+    }
+
+    function clearFile() {
+      state.file = null; state.bytes = 0; state.paid = false; state.savedId = null;
+      fileInput.value = "";
+      dropzone.classList.remove("hidden");
+      fileRow.classList.add("hidden");
+      readyChip.classList.add("hidden");
+      $("successBox").classList.add("hidden");
+      $("payForm").classList.remove("hidden");
+      renderPrice(); setStep(1);
+    }
+
+    function payMethodLabel() {
+      const method = (document.querySelector('input[name="pay"]:checked') || {}).value || "qris";
+      return { qris: "QRIS", bank: "Bank", ewallet: "E-Wallet" }[method] || method;
+    }
+
+    function buildWhatsAppMessage(invoice) {
+      const name = $("fullName").value.trim();
+      const email = $("email").value.trim();
+      const phone = $("phone").value.trim();
+      const campus = $("campus").value.trim() || "-";
+      const docType = $("docType").value;
+      const priority = $("priority").selectedOptions[0].text;
+      const note = $("note").value.trim() || "-";
+      const fileName = state.file ? state.file.name : "-";
+      const fileSize = state.file ? formatBytes(state.file.size) : "-";
+      const ref = $("refCode").value.trim() || "-";
+      return [
+        "*PESANAN CEK DRILLBIT CEREBRIX*",
+        "Invoice: " + invoice, "",
+        "*Data pemesan*",
+        "Nama: " + name, "Email: " + email, "WhatsApp: " + phone, "Institusi: " + campus, "",
+        "*Dokumen*",
+        "File: " + fileName + " (" + fileSize + ")",
+        "Jenis: " + docType,
+        "Jumlah kata: " + state.words.toLocaleString("id-ID"),
+        "Prioritas: " + priority, "Catatan: " + note, "",
+        "*Pembayaran*",
+        "Metode: " + payMethodLabel(),
+        "Harga/kata: Rp 10",
+        "Diskon: " + (state.discount ? formatRp(state.discount) : "-"),
+        "Kode referral: " + ref,
+        "TOTAL: " + formatRp(totalPrice()), "",
+        "_File dokumen sudah diunduh otomatis. Mohon lampirkan file tersebut di chat ini._"
+      ].join("\n");
+    }
+
+    function sendToAdminWhatsApp(invoice) {
+      const digits = String(ADMIN_WHATSAPP).replace(/\D/g, "");
+      const url = "https://wa.me/" + digits + "?text=" + encodeURIComponent(buildWhatsAppMessage(invoice));
+      window.open(url, "_blank");
+    }
+
+    function confirmPay() {
+      const invoice = "SL-" + Date.now().toString().slice(-8);
+      state.paid = true;
+      if (state.file) downloadCopy(state.file);
+      sendToAdminWhatsApp(invoice);
+      $("payForm").classList.add("hidden");
+      $("successBox").classList.remove("hidden");
+      $("receipt").innerHTML = `
+        <div class="price-row"><span>Invoice</span><span>${invoice}</span></div>
+        <div class="price-row"><span>File</span><span>${state.file ? state.file.name : "-"}</span></div>
+        <div class="price-row"><span>Kata</span><span>${state.words.toLocaleString("id-ID")}</span></div>
+        <div class="price-row"><span>Metode</span><span>${payMethodLabel()}</span></div>
+        <div class="price-row"><span>Nama</span><span>${$("fullName").value}</span></div>
+        <div class="price-row"><span>Email</span><span>${$("email").value}</span></div>
+        <div class="price-total"><span>Total</span><b>${formatRp(totalPrice())}</b></div>`;
+      renderPrice();
+      toast("Pesanan dikirim ke WhatsApp admin.");
+    }
+
+    function openModal(id) {
+      document.querySelectorAll(".modal").forEach((m) => m.classList.remove("open"));
+      const el = $(id);
+      if (el) el.classList.add("open");
+      if (id === "qrisModal") drawQris();
+      renderPrice();
+    }
+    function closeModal(id) { const el = $(id); if (el) el.classList.remove("open"); }
+    function closeAllModals() { document.querySelectorAll(".modal").forEach((m) => m.classList.remove("open")); }
+
+    function copyText(text, btn) {
+      const done = () => {
+        toast("Nomor disalin.");
+        if (btn) { const old = btn.textContent; btn.textContent = "Tersalin"; setTimeout(() => { btn.textContent = old; }, 1400); }
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+      } else fallbackCopy(text, done);
+    }
+    function fallbackCopy(text, done) {
+      const ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) { toast("Gagal menyalin."); }
+      ta.remove();
+    }
+
+    function drawQris() {
+      const canvas = $("qrisCanvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const size = canvas.width;
+      const cells = 33;
+      const cell = size / cells;
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, size, size);
+      function finder(x, y) {
+        ctx.fillStyle = "#111"; ctx.fillRect(x * cell, y * cell, 7 * cell, 7 * cell);
+        ctx.fillStyle = "#fff"; ctx.fillRect((x + 1) * cell, (y + 1) * cell, 5 * cell, 5 * cell);
+        ctx.fillStyle = "#111"; ctx.fillRect((x + 2) * cell, (y + 2) * cell, 3 * cell, 3 * cell);
+      }
+      finder(2, 2); finder(cells - 9, 2); finder(2, cells - 9);
+      let seed = 26500757731;
+      function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+      ctx.fillStyle = "#111";
+      for (let y = 0; y < cells; y++) {
+        for (let x = 0; x < cells; x++) {
+          const inTL = x < 11 && y < 11;
+          const inTR = x > cells - 12 && y < 11;
+          const inBL = x < 11 && y > cells - 12;
+          if (inTL || inTR || inBL) continue;
+          if (rnd() > 0.46) ctx.fillRect(x * cell, y * cell, cell, cell);
+        }
+      }
+    }
+
+    wordInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); applyManualWords(true); } });
+    wordInput.addEventListener("input", () => applyManualWords(false));
+    dropzone.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", (e) => acceptFile(e.target.files[0]));
+    ["dragenter", "dragover"].forEach((ev) => {
+      dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.add("drag"); });
+    });
+    ["dragleave", "drop"].forEach((ev) => {
+      dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.remove("drag"); });
+    });
+    dropzone.addEventListener("drop", (e) => acceptFile(e.dataTransfer.files[0]));
+    $("removeFile").addEventListener("click", clearFile);
+
+    $("applyRef").addEventListener("click", () => {
+      const code = $("refCode").value.trim().toUpperCase();
+      if (!state.words) { toast("Isi jumlah kata dulu."); return; }
+      if (code === "SCAN10") { state.discount = Math.round(rawPrice() * 0.1); toast("Kode SCAN10 diterapkan. Diskon 10%."); }
+      else if (!code) { state.discount = 0; toast("Kode referral dikosongkan."); }
+      else { state.discount = 0; toast("Kode referral tidak valid."); }
+      renderPrice();
+    });
+
+    document.querySelectorAll(".step").forEach((btn) => {
+      btn.addEventListener("click", () => setStep(Number(btn.dataset.goto)));
+    });
+    ctaBtn.addEventListener("click", () => {
+      if (state.step === 1) setStep(2);
+      else if (state.step === 2) setStep(3);
+      else if (state.step === 3 && !state.paid) confirmPay();
+    });
+
+    document.querySelectorAll("#payOptions .pay-opt").forEach((opt) => {
+      opt.addEventListener("click", () => {
+        document.querySelectorAll("#payOptions .pay-opt").forEach((o) => o.classList.remove("selected"));
+        opt.classList.add("selected");
+        const radio = opt.querySelector("input");
+        if (radio) radio.checked = true;
+        const map = { qris: "qrisModal", bank: "bankModal", ewallet: "ewalletModal" };
+        if (radio && map[radio.value]) openModal(map[radio.value]);
+      });
+    });
+
+    document.querySelectorAll("[data-close]").forEach((btn) => {
+      btn.addEventListener("click", () => closeModal(btn.getAttribute("data-close")));
+    });
+    document.querySelectorAll(".modal").forEach((modal) => {
+      modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("open"); });
+    });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAllModals(); });
+    document.querySelectorAll(".copy-btn").forEach((btn) => {
+      btn.addEventListener("click", () => copyText(btn.getAttribute("data-copy") || "", btn));
+    });
+
+    $("helpBtn").addEventListener("click", () => openModal("helpModal"));
+    $("closeHelp").addEventListener("click", () => closeModal("helpModal"));
+    const qrisPhoto = $("qrisPhoto");
+    const qrisPoster = $("qrisPoster");
+    if (qrisPhoto && qrisPoster) {
+      qrisPhoto.addEventListener("error", () => {
+        qrisPhoto.classList.add("hidden");
+        qrisPoster.classList.remove("hidden");
+        drawQris();
+      });
+      qrisPhoto.addEventListener("load", () => {
+        qrisPhoto.classList.remove("hidden");
+        qrisPoster.classList.add("hidden");
+      });
+    }
+
+    renderPrice();
+    drawQris();
+  </script>
+</body>
+</html>
